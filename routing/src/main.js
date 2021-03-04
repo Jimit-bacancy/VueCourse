@@ -1,62 +1,21 @@
-import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
+import Vue from 'vue'
+import App from './App.vue'
+import VueRouter from 'vue-router';
+import { routes } from './routes';
 
-import App from './App.vue';
-import TeamsList from './components/teams/TeamsList';
-import UsersList from './components/users/UsersList';
-import TeamMembers from './components/teams/TeamMembers';
-import PageNotFound from './components/nav/PageNotFound';
-import TeamsFooter from './components/teams/TeamsFooter';
-import UsersFooter from './components/users/UsersFooter';
+Vue.use(VueRouter);
 
-const router = createRouter({
-    history: createWebHistory(),
-    routes: [
-        // { path: '/', redirect: '/teams'},
-        { name: 'teams', path: '/teams', 
-            meta: { needsAuth: true},
-            components: { default: TeamsList, footer: TeamsFooter }, 
-            alias: '/', children: [
-            { name: 'team-members', path: ':teamId', component:TeamMembers, props:true},
-        ]},
-        { path: '/users', components:{ default: UsersList, footer: UsersFooter },
-                            beforeEnter: (to, from, next) => {
-                                console.log('Users Roter level');
-                                console.log(to, from);
-                                next();
-                            } },
-        { path: '/:notFound(.*)', component: PageNotFound}
-    ],
-    scrollBehavior (to, from, savedPosition) {
-        // console.log(to, from, savedPosition);
-        if(savedPosition){
-            return savedPosition;
-        }else{
-            return { left: 0, top: 0 };
-        }
-    }
+const router = new VueRouter({
+  routes,
 });
 
-// router.afterEach( function(to, from) {
-//     //Used for sending analytics data
-//     //Send data to server
-//     console.log('Global afterEach');
-//     console.log(to, from);
-// })
+router.beforeEach((to, from, next) => {
+  console.log('Global Before Each!');
+  next();
+});
 
-router.beforeEach(function(to, from, next) {
-    console.log('Global level');
-    console.log(to, from);
-    if(to.meta.needsAuth){
-        console.log('Needs Auth!!');
-        next();
-    }else{
-        next();
-    }
+new Vue({
+  el: '#app',
+  router,
+  render: h => h(App)
 })
-
-const app = createApp(App)
-
-app.use(router);
-
-app.mount('#app'); 
